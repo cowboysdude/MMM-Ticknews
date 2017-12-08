@@ -1,0 +1,98 @@
+
+.MMM-Ticknews .oneliner {
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+	position: relative;
+	margin: 80px auto 40px auto;
+	width: 900px;
+	height: 44px;
+    background-color: .fff;
+    border-radius: 2px;
+}
+
+.MMM-Ticknews .oneliner:before, .oneliner:after {
+	border-radius: 100px 100px 100px 100px / 10px 10px 10px 10px;
+	bottom: 0;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+	content: "";
+	left: 10px;
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	z-index: -1;
+}
+
+.MMM-Ticknews .oneliner .heder {
+	background-color: .ff2e2e;
+	display: inline-block;
+	width: 180px;
+	height: 44px;
+	text-transform: uppercase;
+	font-weight: 500;
+	line-height: 44px;
+	color: .fff;
+	white-space: nowrap;
+	overflow: hidden;
+	text-align: center;
+	border-radius: 2px 0 0 2px;
+	cursor: pointer;
+	-webkit-transition: all .2s ease-in-out;
+	   -moz-transition: all .2s ease-in-out;
+	    -ms-transition: all .2s ease-in-out;
+	     -o-transition: all .2s ease-in-out;
+            transition: all .2s ease-in-out;
+	-webkit-animation: redPulse 4s infinite;
+	   -moz-animation: redPulse 4s infinite;
+	        animation: redPulse 4s infinite;
+}
+
+.MMM-Ticknews .oneliner:hover .heder {
+	-webkit-animation: redPulse 1s infinite;
+	   -moz-animation: redPulse 1s infinite;
+	        animation: redPulse 1s infinite;
+}
+
+.MMM-Ticknews .oneliner .heder:active {
+	background-color: .000;
+	margin-left: -12px;
+	color: .aaa;
+}
+
+.MMM-Ticknews .oneliner ul.newsticker {
+	display: inline-block;
+	height: 44px;
+	width: 710px;
+	overflow: hidden;
+	margin: 0 0 0 -3px;
+	padding: 0 0 0 6px;
+	line-height: 44px;
+	font-weight: 500;
+	background-color: .fafafa;
+}
+
+.MMM-Ticknews .oneliner ul.newsticker > li{
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	border-bottom: 1px dotted .888;
+}
+
+
+
+
+@-webkit-keyframes redPulse {
+  from { background-color: .ff2e2e; -webkit-box-shadow: 0 0 9px .555; }
+  50% { background-color: .bd0000; -webkit-box-shadow: 0 0 14px .ff2e2e; }
+  to { background-color: .ff2e2e; -webkit-box-shadow: 0 0 9px .555; }
+}
+
+@-moz-keyframes redPulse {
+  from { background-color: .ff2e2e; -moz-box-shadow: 0 0 9px .555; }
+  50% { background-color: .bd0000; -moz-box-shadow: 0 0 14px .ff2e2e; }
+  to { background-color: .ff2e2e; -moz-box-shadow: 0 0 9px .555; }
+}
+
+@keyframes redPulse {
+  from { background-color: .ff2e2e; box-shadow: 0 0 9px .555; }
+  50% { background-color: .bd0000; box-shadow: 0 0 14px .ff2e2e; }
+  to { background-color: .ff2e2e; box-shadow: 0 0 9px .555; }
+}
