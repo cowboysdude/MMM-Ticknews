@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css?family=Titillium+Web');
+.MMM-Ticknews {
+	padding-bottom: 34px;
+}
+.contents 
+	{
+	background: #676666;
+	max-width: 950px;
+	padding: 3px;
+	margin: 0px auto 0px auto;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	}
+
+.title 
+	{
+	color: #FFFFFF;
+	font: bold 18px arial, sans-serif;
+	background:  #0099cc; 
+	padding: 5px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	}
+.link {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 50px 15px 50px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+.button1 {
+  font-family: 'Titillium Web', sans-serif;
+  background-color: black; 
+  color: white; 
+  border: 4px solid #008CBA;
+  font-weight: bold;
+  font-size: .8em;
+  margin-bottom: 10px;
+  margin-top: 15px;
+  border-radius: 20%;
+}
+.titles 
+		{
+		font-family: 'Titillium Web', sans-serif;
+		color: #000000;
+		font-size: .6em;
+		line-height: 36px;
+		
+		}
+.infoCenter {
+  position: fixed;
+  bottom: 20px;
+  width: 60%;
+  padding-bottom: 130px;
+  z-index: 3;
+  text-align: center;
+  border: 1px solid #fff;
+  border-radius: 10px;
+  background-color: black;
+  padding: 5px;
+  font-size: 20px;
+  line-height: 130%;
+  box-shadow: 0px 0px 20px 1px #eee;
+  cursor: pointer;
+}
+.fed {
+  cursor: pointer;
+}
+ 
+
+
