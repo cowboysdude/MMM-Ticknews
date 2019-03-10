@@ -1,0 +1,48 @@
+.MMM-Ticknews {
+	height: 50px;
+ 
+	overflow: hidden;
+	padding-bottom: 5px;
+}
+
+.contents {
+  overflow-y: hidden;
+  max-height: calc(100vh - 4em);
+  width: 70vw;
+  margin: auto;
+  height: 75px;
+}
+.image {
+	width: 2%;
+	height: 2%
+}
+.left {
+  float: left;
+  width: 15%;
+  margin-right: 2px;
+   
+}
+.item {
+  overflow: hidden;
+  height: 4em;
+  color: #fff;
+  font-size: .6em; 
+  margin: 0;
+  line-height: 1em;
+  background-color: Black;
+  float: right;
+  width: 75%;
+}
+.item.sliding-now {
+  animation: up 2s linear infinite forwards;
+  animation-delay: 3s;
+}
+
+@keyframes up {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-2em - 1em));
+  }
+}
