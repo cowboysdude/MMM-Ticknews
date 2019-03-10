@@ -4,7 +4,7 @@
 	{
 	    disabled: f,
 	    module: 'MMM-Ticknews',
-	    position: 'lower_third',  //suggested placement as it's long
+ 	    position: 'bottom_bar',  //or lower_third suggested placement as it's long
 		config: {
 		    css: "plain",  //choice are - plain, red, blue, orange, gold, black, green, light blue (lblue)
 		    random: true,  //show stories randomly true or in order false
