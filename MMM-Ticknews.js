@@ -44,7 +44,15 @@ Module.register('MMM-Ticknews', {
         this.rotateInterval = null;
         moment.locale(config.language);
     },
-
+ /////////// BY STIGH to work with voice ///////////////////////
+   notificationReceived: function(notification, payload) {
+        if (notification === 'SHOW_ARTICLE') {
+            document.getElementsByClassName('titles')[0].click();
+        } else if (notification === 'HIDE_ARTICLE') {
+            document.getElementById('myframe').click();
+        }
+    },
+//////////////////////////////////////////////////////////////
     scheduleCarousel: function() {
         console.log("Scheduling news items");
         this.rotateInterval = setInterval(() => {
