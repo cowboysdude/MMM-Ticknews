@@ -1,167 +1,173 @@
-/* Magic Mirror
- * Module: MMM-Ticknews .. redux 2/2019
+/* MagicMirror² Module: MMM-Ticknews
  * By cowboysdude
  *
+ * A news ticker: one headline at a time from any RSS/Atom feeds,
+ * with how long ago it was posted. Tap a headline (touch mirrors)
+ * to read its summary.
  */
- 
- 
-Module.register('MMM-Ticknews', {
+Module.register("MMM-Ticknews", {
+	defaults: {
+		urls: ["https://feeds.npr.org/1001/rss.xml"], // any RSS or Atom feeds, as many as you like
+		articles: 50,              // up to how many headlines to keep (all feeds together)
+		random: true,              // true = random order, false = newest first
+		rotateInterval: 10 * 1000, // next headline every 10 seconds
+		updateInterval: 15 * 60 * 1000, // get fresh news every 15 minutes
+		css: "plain",              // plain, red, blue, orange, gold, black, green or lblue
+		timeAgo: "",               // color of the "2 hours ago" text, e.g. "white" (blank = theme color)
+		showSource: true,          // show which feed the headline came from
+		readInterval: 30 * 1000,   // a tapped summary closes on its own after 30 seconds
+		maxWidth: "950px",
+		retryDelay: 5 * 60 * 1000,
+		animationSpeed: 500
+	},
 
-    // Module config defaults.
-    defaults: {
-        updateInterval: 60 * 60 * 1000,
-        animationSpeed: 0,
-        initialLoadDelay: 10,
-        random: true,
-        articles: "10",
-        urls: [],
-        rotateInterval: 5 * 1000,
-        css: "",
-        timeAgo: "#000",
-        readInterval: 10 * 1000
-    },
+	themes: ["plain", "red", "blue", "orange", "gold", "black", "green", "lblue"],
 
-    // Define required scripts.
-    getScripts: function() {
-        return ['moment.js'];
-    },
+	getStyles () {
+		return [this.file("MMM-Ticknews.css")];
+	},
 
-    getStyles: function() {
-        if (this.config.css != "") {
-            return ["modules/MMM-Ticknews/css/" + this.config.css + ".css"];
-        } else {
-            return ["modules/MMM-Ticknews/css/plain.css"];
-        }
-    },
+	start () {
+		Log.info(`Starting module: ${this.name}`);
+		this.items = [];
+		this.order = [];
+		this.pos = 0;
+		this.error = null;
+		this.reading = null;
+		this.theme = this.themes.includes(String(this.config.css)) ? String(this.config.css) : "plain";
+		const urls = Array.isArray(this.config.urls) ? this.config.urls : [this.config.urls];
+		this.urls = urls.filter((u) => typeof u === "string" && u.trim());
+		if (!this.urls.length) return;
+		this.request();
+		setInterval(() => this.request(), this.config.updateInterval);
+		this.startRotation();
+		// Keep "x minutes ago" up to date
+		setInterval(() => { if (!this.reading) this.updateDom(0); }, 60 * 1000);
+	},
 
-    start: function() {
-        Log.info("Starting module: " + this.name);
-        this.sendSocketNotification('CONFIG', this.config);
-        this.config.lang = this.config.lang || config.language;
-        this.scheduleUpdate();
-        this.news = [];
-        this.activeItem = 0;
-        this.rotateInterval = null;
-        moment.locale(config.language);
-    },
- /////////// BY STIGH to work with voice ///////////////////////
-   notificationReceived: function(notification, payload) {
-        if (notification === 'SHOW_ARTICLE') {
-            document.getElementsByClassName('titles')[0].click();
-        } else if (notification === 'HIDE_ARTICLE') {
-            document.getElementById('myframe').click();
-        }
-    },
-//////////////////////////////////////////////////////////////
-    scheduleCarousel: function() {
-        console.log("Scheduling news items");
-        this.rotateInterval = setInterval(() => {
-            this.activeItem++;
-            this.updateDom(this.config.animationSpeed);
-        }, this.config.rotateInterval);
-    },
+	startRotation () {
+		clearInterval(this.rotateTimer);
+		this.rotateTimer = setInterval(() => {
+			if (this.reading || this.order.length < 2) return;
+			this.pos++;
+			if (this.pos >= this.order.length) this.makeOrder();
+			this.updateDom(this.config.animationSpeed);
+		}, this.config.rotateInterval);
+	},
 
-    getDom: function() {
+	makeOrder () {
+		this.order = this.items.map((_, i) => i);
+		if (this.config.random !== false) {
+			for (let i = this.order.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				[this.order[i], this.order[j]] = [this.order[j], this.order[i]];
+			}
+		}
+		this.pos = 0;
+	},
 
-        var wrapper = document.createElement("div");
-        wrapper.classList.add("contents");
+	request () {
+		this.sendSocketNotification("TICKNEWS_GET", {
+			id: this.identifier, urls: this.urls, articles: this.config.articles
+		});
+	},
 
-        var keys = Object.keys(this.news);
-        if (keys.length > 0) {
-            if (this.activeItem >= keys.length) {
-                this.activeItem = 0;
-            }
-            var news = this.news[keys[this.activeItem]];
+	socketNotificationReceived (notification, payload) {
+		if (!payload || payload.id !== this.identifier) return;
+		if (notification === "TICKNEWS_DATA") {
+			const first = !this.items.length;
+			this.items = payload.items;
+			this.error = null;
+			this.makeOrder();
+			if (first) this.updateDom(this.config.animationSpeed);
+		} else if (notification === "TICKNEWS_ERROR") {
+			this.error = payload.message;
+			clearTimeout(this.retryTimer);
+			this.retryTimer = setTimeout(() => this.request(), this.config.retryDelay);
+			if (!this.items.length) this.updateDom(this.config.animationSpeed);
+		}
+	},
 
-            date = moment(news.pubDate[0]).format("LL");
-            time = moment(news.pubDate[0]).valueOf();
+	// Voice control (MMM-voice and friends)
+	notificationReceived (notification) {
+		if (notification === "SHOW_ARTICLE") this.openSummary();
+		else if (notification === "HIDE_ARTICLE") this.closeSummary();
+	},
 
-            function timeago(date) {
-                var seconds = Math.floor((new Date() - time) / 1000);
-                if (Math.round(seconds / (60 * 60 * 24 * 365.25)) >= 2) return Math.round(seconds / (60 * 60 * 24 * 365.25)) + " years ago";
-                else if (Math.round(seconds / (60 * 60 * 24 * 365.25)) >= 1) return "1 year ago";
-                else if (Math.round(seconds / (60 * 60 * 24 * 30.4)) >= 2) return Math.round(seconds / (60 * 60 * 24 * 30.4)) + " months ago";
-                else if (Math.round(seconds / (60 * 60 * 24 * 30.4)) >= 1) return "1 month ago";
-                else if (Math.round(seconds / (60 * 60 * 24 * 7)) >= 2) return Math.round(seconds / (60 * 60 * 24 * 7)) + " weeks ago";
-                else if (Math.round(seconds / (60 * 60 * 24 * 7)) >= 1) return "1 week ago";
-                else if (Math.round(seconds / (60 * 60 * 24)) >= 2) return Math.round(seconds / (60 * 60 * 24)) + " days ago";
-                else if (Math.round(seconds / (60 * 60 * 24)) >= 1) return "1 day ago";
-                else if (Math.round(seconds / (60 * 60)) >= 2) return Math.round(seconds / (60 * 60)) + " hours ago";
-                else if (Math.round(seconds / (60 * 60)) >= 1) return "1 hour ago";
-                else if (Math.round(seconds / 60) >= 2) return Math.round(seconds / 60) + " minutes ago";
-                else if (Math.round(seconds / 60) >= 1) return "1 minute ago";
-                else if (seconds >= 2) return this.translate("seconds ago");
-                else return "seconds ago";
-            }
+	current () {
+		if (!this.items.length) return null;
+		return this.items[this.order[this.pos % this.order.length]];
+	},
 
-            var tio = document.createElement("div");
-            tio.classList.add("title");
-            tio.innerHTML = "  The News <font color= " + this.config.timeAgo + ">" + timeago(date) + "</font>";
-            wrapper.appendChild(tio);
+	openSummary () {
+		const item = this.current();
+		if (!item) return;
+		this.reading = item;
+		clearTimeout(this.readTimer);
+		this.readTimer = setTimeout(() => this.closeSummary(), this.config.readInterval);
+		this.updateDom(0);
+	},
 
-            var ntime = moment(news.pubDate[0]).format('YYYY,M,DD');
-            var stime = moment([ntime]).fromNow();
+	closeSummary () {
+		if (!this.reading) return;
+		this.reading = null;
+		clearTimeout(this.readTimer);
+		this.updateDom(0);
+	},
 
-            var title = document.createElement("div");
-            title.classList.add("titles")
-            title.innerHTML = news.title;
-            title.addEventListener("click", () => showdesc(this)); //Show description on click
-            wrapper.appendChild(title);
+	timeAgo (t) {
+		if (!t) return "";
+		const s = Math.max(0, Math.floor((Date.now() - t) / 1000));
+		const units = [["year", 31557600], ["month", 2629800], ["week", 604800], ["day", 86400], ["hour", 3600], ["minute", 60]];
+		for (const [name, size] of units) {
+			const n = Math.floor(s / size);
+			if (n >= 1) return `${n} ${name}${n > 1 ? "s" : ""} ago`;
+		}
+		return "just now";
+	},
 
-            function showdesc(thisdesc) {
-                thisdesc.intpause();
-                var readTimer = setTimeout(function() {
-                    hidedesc(thisdesc)
-                }, thisdesc.config.readInterval); //sets timeout for the description
-                description = document.createElement("div");
-                description.className = "infoCenter";
-                description.innerHTML = "<iframe id = 'myframe' src=" + news.link[0] + " height='650' width='99%' align='middle'></iframe><a class= 'link button1' href='javascript:closeIframe();'>CLOSE</a>";
-                description.addEventListener("click", () => closeIframe()); //Hide description on click
-                description.addEventListener("click", () => clearTimeout(readTimer)); //Stop timer when clicked so the next title doesn't reload again.
-                description.addEventListener("click", () => thisdesc.scheduleCarousel());
-                wrapper.appendChild(description);
-            };
+	el (tag, cls, text) {
+		const e = document.createElement(tag);
+		if (cls) e.className = cls;
+		if (text !== undefined) e.textContent = text;
+		return e;
+	},
 
-            function closeIframe() {
-                var iframe = document.getElementById('myframe');
-                iframe.parentNode.removeChild(iframe);
-                description.style.display = "none";
-            }
-        }
-        return wrapper;
-    },
+	getDom () {
+		const wrap = this.el("div", `tn tn-${this.theme}`);
+		wrap.style.maxWidth = this.config.maxWidth;
 
-    intpause: function() {
-        clearInterval(this.rotateInterval);
-    },
+		if (!this.urls.length) {
+			wrap.appendChild(this.el("div", "tn-msg", "MMM-Ticknews: add at least one feed to urls in config.js."));
+			return wrap;
+		}
+		const item = this.current();
+		if (!item) {
+			wrap.appendChild(this.el("div", "tn-msg",
+				this.error ? "News not available right now. Trying again soon." : "Getting the news…"));
+			return wrap;
+		}
 
-    processNEWS: function(data) {
-        this.today = data.Today;
-        this.news = data[0].item;
-        this.title = data[0].title[0];
-        console.log(this.news);
-    },
+		const bar = this.el("div", "tn-bar");
+		bar.appendChild(this.el("span", "tn-label", "The News"));
+		const ago = this.el("span", "tn-ago", this.timeAgo(item.time));
+		if (this.config.timeAgo) ago.style.color = this.config.timeAgo;
+		bar.appendChild(ago);
+		if (this.config.showSource && item.source) bar.appendChild(this.el("span", "tn-source", item.source));
+		wrap.appendChild(bar);
 
-    scheduleUpdate: function() {
-        setInterval(() => {
-            this.getNEWS();
-        }, this.config.updateInterval);
-        this.getNEWS(this.config.initialLoadDelay);
-    },
+		const head = this.el("div", "tn-headline", item.title);
+		head.addEventListener("click", () => (this.reading ? this.closeSummary() : this.openSummary()));
+		wrap.appendChild(head);
 
-    getNEWS: function() {
-        this.sendSocketNotification('GET_TICKNEWS');
-    },
-
-    socketNotificationReceived: function(notification, payload) {
-        if (notification === "TICKNEWS_RESULT") {
-            this.processNEWS(payload);
-        }
-        if (this.rotateInterval == null) {
-            this.scheduleCarousel();
-        }
-
-        this.updateDom();
-    }
-
+		if (this.reading) {
+			const box = this.el("div", "tn-summary");
+			box.appendChild(this.el("div", "tn-summary-title", this.reading.title));
+			box.appendChild(this.el("div", "tn-summary-text", this.reading.summary || "No summary for this story."));
+			box.appendChild(this.el("div", "tn-summary-close", "Tap to close"));
+			box.addEventListener("click", () => this.closeSummary());
+			wrap.appendChild(box);
+		}
+		return wrap;
+	}
 });

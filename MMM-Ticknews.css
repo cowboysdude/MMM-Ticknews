@@ -1,48 +1,98 @@
-.MMM-Ticknews {
-	height: 50px;
- 
+/* MMM-Ticknews — all themes in one file. Choose with css: "red" etc. in config.js */
+
+.MMM-Ticknews .tn {
+	margin: 0 auto;
+	text-align: left;
+	font-family: "Roboto Condensed", sans-serif;
+}
+
+.MMM-Ticknews .tn-msg {
+	font-size: 18px;
+	color: #999;
+	padding: 4px;
+}
+
+.MMM-Ticknews .tn-bar {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 16px;
+	line-height: 1.2;
+}
+
+.MMM-Ticknews .tn-label {
+	font-weight: bold;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.MMM-Ticknews .tn-source {
+	margin-left: auto;
+	opacity: 0.8;
+	white-space: nowrap;
 	overflow: hidden;
-	padding-bottom: 5px;
+	text-overflow: ellipsis;
 }
 
-.contents {
-  overflow-y: hidden;
-  max-height: calc(100vh - 4em);
-  width: 70vw;
-  margin: auto;
-  height: 75px;
-}
-.image {
-	width: 2%;
-	height: 2%
-}
-.left {
-  float: left;
-  width: 15%;
-  margin-right: 2px;
-   
-}
-.item {
-  overflow: hidden;
-  height: 4em;
-  color: #fff;
-  font-size: .6em; 
-  margin: 0;
-  line-height: 1em;
-  background-color: Black;
-  float: right;
-  width: 75%;
-}
-.item.sliding-now {
-  animation: up 2s linear infinite forwards;
-  animation-delay: 3s;
+.MMM-Ticknews .tn-headline {
+	font-size: 24px;
+	line-height: 1.3;
+	padding: 6px 8px 4px;
+	cursor: pointer;
 }
 
-@keyframes up {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(calc(-2em - 1em));
-  }
+/* Tapped summary */
+.MMM-Ticknews .tn-summary {
+	margin-top: 6px;
+	padding: 12px 14px;
+	border: 1px solid #fff;
+	border-radius: 10px;
+	background: #000;
+	box-shadow: 0 0 20px 1px #555;
+	cursor: pointer;
 }
+
+.MMM-Ticknews .tn-summary-title {
+	font-size: 22px;
+	color: #fff;
+	font-weight: bold;
+	margin-bottom: 6px;
+}
+
+.MMM-Ticknews .tn-summary-text {
+	font-size: 18px;
+	line-height: 1.4;
+	color: #ccc;
+}
+
+.MMM-Ticknews .tn-summary-close {
+	margin-top: 8px;
+	font-size: 14px;
+	color: #888;
+	text-align: right;
+}
+
+/* ---------- plain: no box, yellow label, white headline ---------- */
+.MMM-Ticknews .tn-plain .tn-bar { padding-left: 0; padding-right: 0; color: #999; }
+.MMM-Ticknews .tn-plain .tn-label { color: yellow; }
+.MMM-Ticknews .tn-plain .tn-ago { color: #bbb; }
+.MMM-Ticknews .tn-plain .tn-headline { color: #fff; padding-left: 0; padding-right: 0; }
+
+/* ---------- colored themes: gray box, colored label bar ---------- */
+.MMM-Ticknews .tn:not(.tn-plain) {
+	background: #3a3a3a;
+	padding: 4px;
+	border-radius: 6px;
+}
+.MMM-Ticknews .tn:not(.tn-plain) .tn-bar { color: #fff; }
+.MMM-Ticknews .tn:not(.tn-plain) .tn-headline { color: #fff; }
+
+.MMM-Ticknews .tn-red .tn-bar { background: #990000; }
+.MMM-Ticknews .tn-blue .tn-bar { background: #0099cc; }
+.MMM-Ticknews .tn-orange .tn-bar { background: #e6a23c; }
+.MMM-Ticknews .tn-gold .tn-bar { background: #999933; }
+.MMM-Ticknews .tn-black .tn-bar { background: #000; }
+.MMM-Ticknews .tn-green .tn-bar { background: #009933; }
+.MMM-Ticknews .tn-lblue .tn-bar { background: #5fa8a8; }
