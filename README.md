@@ -2,7 +2,12 @@
 
 A news ticker for [MagicMirror²](https://github.com/MagicMirrorOrg/MagicMirror). It shows one
 headline at a time from any news feeds you like, with how long ago it was posted and where it came
-from. On a touch mirror, tap a headline to read its summary.
+from. On a touch mirror, tap a headline to read its summary or if you have a custom css file in the css
+directory you can just add
+html {
+  cursor: auto;
+}
+ and your mouse will work
 
 ## Screenshots
 
