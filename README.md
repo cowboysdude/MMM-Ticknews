@@ -9,7 +9,7 @@ html {
   cursor: auto;
 }
 ```
- and your mouse will work
+ and your mouse will work.  If you don't just add custom.css then put that in it.  Reboot.
 
 ## Screenshots
 
